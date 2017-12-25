@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Hello World</title>
+</head>
+
+<body>
+    <div class="app">
+        <h1>Hello web1612</h1>
+        <div id="decvicere">设备信息加载中...</div>
+        <button onclick="getCurrentAcceleration()">获取当前的加速度信息</button>
+        <button onclick="watchDeviceAcceleration()">固定监听加速度</button>
+        <button onclick="stopWatch()">结束监听</button>
+        <button onclick="record()">录音</button>
+        <button onclick="showAlert()">显示警告</button>
+        <button onclick="playVibrate()">震动</button>
+        <button onclick="playSound()">发出声音</button>
+        <button onclick="writesth()">写入</button>
+        <button onclick="readSth()">读取</button>
+        <button onclick="picture()">选取图片</button>
+        <button onclick="camera()">拍照</button>
+        <button onclick="createMyContact()">创建联系人</button>
+        <button onclick="onSuccess()">联系人</button>
+        <img id="myImage" src="" alt="" width="100" height="100">
+        <div id="deviceready" class="blink">
+            <p class="event listening">Connecting to Device</p>
+            <p class="event received">Device is Ready</p>
+        </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+        //得到当前的加速度信息
+        function getCurrentAcceleration(){
+            navigator.accelerometer.getCurrentAcceleration(
+                function (acceleration) {
+                    alert("get success x:"+acceleration.x+" y:"+acceleration.y+" z:"+acceleration.z);
+                    console.log(
+                        "get success x:"+acceleration.x+" y:"+acceleration.y+" z:"+acceleration.z
+                    );
+                },
+                function () {
+                    alert("get failed");
+                }
+            )
+        }
+
+        //间隔监听加速度传感器信息的变化
+        function watchDeviceAcceleration(){
+           watchID = navigator.accelerometer.watchAcceleration(
+                function (acceleration) {
+                    console.log("get success x:"+acceleration.x+" y:"+acceleration.y+" z:"+acceleration.z)
+                },
+                function () {
+                    alert("get failed");
+                },
+                {frequency:1000}
+            )
+        }
+
+        //停止对某个监听加速度
+        function stopWatch (){
+            if (watchID){
+                navigator.accelerometer.clearWatch(watchID);
+            }
+            watchID=null;
+        }
+
+        //采集音频信息
+        function record (){
+            navigator.device.capture.captureAudio(
+                function (mediaFiles) {
+                    alert(mediaFiles[0].fullPath);
+                    //alert("capture success");
+                },
+                function () {
+                    alert("capture failed")
+                },
+                //录制最长时间秒数，限制个数
+                {duration:20,limit:1}
+            )
+        }
+
+        //显示一个警告窗口
+        function showAlert(){
+            navigator.notification.alert("it is an alert");
+        }
+        //发出震动
+        function playVibrate(){
+            navigator.notification.vibrate(5000);//震动秒数
+        }
+        //发出蜂鸣声
+        function playSound(){
+            navigator.notification.beep(3);//发几次
+        }
+        //完成写操作：创建read.txt,
+        //向文件中写入hello phonegap
+        function writesth(){
+            //得到文件系统
+            window.requestFileSystem(
+                LocalFileSystem.PERSISTENT,
+                0,
+                getFssucc,
+                function (){
+                    alert("requestFileSystem failed");
+                }
+            );
+            //得到fileEntry
+            //得到fileWrite，完成写操作
+        }
+        //请求文件系统成功时的
+        function getFssucc(fileSystem) {
+            fileSystem.root.getFile(
+                "read.txt",
+                {create:true},
+                function (fileEntry) {
+                    //创建fileWriter
+                    fileEntry.createWriter(
+                        function (fileWriter) {
+                            fileWriter.write("hello phonegap");
+                            //写入成功，会调用onwrite所指定的函数
+                            fileWriter.onwrite = function () {
+                                alert("write success");
+                            }
+                        },
+                        function () {
+                            alert("get fileWriter failed");
+                        }
+                    )
+            },
+                function () {
+                    alert("get fileEntry failed")
+                }
+            );
+        }
+
+        //读取文件系统,从根目录找到readme.txt
+        //读取文件所有内容，弹窗显示
+        function readSth() {
+            //得到文件系统
+            window.requestFileSystem(
+                LocalFileSystem.PERSISTENT,
+                0,
+                //请求文件系统成功后的处理函数
+                function (fileSystem) {
+                    fileSystem.root.getFile(
+                        "read.txt",
+                        null,
+                        //创建fileEntry成功的处理函数
+                        function (fileEntry) {
+                            //创建file对象（包含文件所有的属性）
+                            fileEntry.file(
+                                function (file) {
+                                    //创建一个读对象
+                                    var reader = new FileReader();
+                                    reader.readAsText(file);
+                                    //读操作完成之后执行的处理函数
+                                    reader.onloadend = function (event) {
+                                        alert(event.target.result);
+                                    }
+                                },
+                                function () {
+                                    alert("get file failed");
+                                }
+                            )
+                        },
+                        function () {
+                            alert("get fileEntry failed");
+                        }
+                    )
+                },
+                function () {
+                    alert("get fs failed");
+                }
+            );
+        }
+
+        //选取图片
+        function picture() {
+            navigator.camera.getPicture(
+                function (imageURI) {
+                    var image = document.getElementById('myImage');
+                    image.src = imageURI;
+
+                },
+                function (mesage) {
+                    alert('Failed because: ' + mesage);
+                },
+                {sourceType: Camera.PictureSourceType.PHOTOLIBRARY}
+            )
+
+        }
+        //拍照
+            function camera() {
+                navigator.camera.getPicture(
+                    function (imageData) {
+                        var image = document.getElementById('myImage');
+                        image.src = imageData;
+                    },
+                    function (mesage) {
+                        alert('Failed because: ' + mesage);
+                    },
+                    { quality: 40 }
+                    );
+
+
+            }
+
+        //创建联系人
+        //创建联系人
+        function createMyContact(){
+
+            //新建联系人
+            zhangsan = navigator.contacts.create();
+
+            zhangsan.displayName="张三";
+            zhangsan.address = "北京万寿路1号文博大厦";
+
+            zhangsan.save(
+                function () {
+                    alert('save success');
+                },
+                function () {
+                    alert(' save failed ')
+                }
+            )
+
+        }
+
+        function onSuccess(contacts) {
+            for (var i=0; i< contacts.length; i++) {
+                for (var j=0; j< contacts[i].addresses.length; j++) {
+                    alert("Pref: " + contacts[i].addresses[j].pref + "\n" +
+                        "Type: " + contacts[i].addresses[j].type + "\n" +
+                        "Formatted: " + contacts[i].addresses[j].formatted + "\n" +
+                        "Street Address: "  + contacts[i].addresses[j].streetAddress + "\n" +
+                        "Locality: "  + contacts[i].addresses[j].locality + "\n" +
+                        "Region: "  + contacts[i].addresses[j].region + "\n" +
+                        "Postal Code: "  + contacts[i].addresses[j].postalCode + "\n" +
+                        "Country: "  + contacts[i].addresses[j].country);
+                }
+            }
+        }
+
+        function onError(contactError) {
+            alert('onError!');
+        }
+
+        function findContact(){
+            // 从全部联系人中查找
+            var options = new ContactFindOptions();
+            options.filter="zhangsan";
+            var filter = ["displayName","addresses"];
+            navigator.contacts.find(
+                filter,
+                onSuccess,
+                onError,
+                options);
+        }
+    </script>
+</body>
+
+</html>
